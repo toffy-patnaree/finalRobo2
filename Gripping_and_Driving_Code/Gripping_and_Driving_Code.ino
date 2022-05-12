@@ -97,7 +97,7 @@ void setup()
   // Initialize Servo Motor, Set servo to Mid-point.
   myServo1.write(90); // change to 90 mai?
   myServo2.write(90);
-  myServo3.write(90);
+  myServo3.write(70);
   myServo4.write(90); // change to 90 mai?
 
   // Open Serial port, Set baud rate for serial data transmission.
@@ -128,63 +128,63 @@ void loop()
     // Substract 1500 as the offset to set new signal range from (1000, 2000) to (-500, 500)
     // Also set Deadband limit to the input Signal
 
-    input1 = pulseIn(CH1, HIGH) - 1500; // Channel 1
-    input2 = pulseIn(CH2, HIGH) - 1500; // Channel 2
-    input3 = pulseIn(CH3, HIGH) - 1500; // Channel 3
-    input4 = pulseIn(CH4, HIGH) - 1500; // Channel 4
-    input5 = pulseIn(CH5, HIGH) - 1500; // Channel 5
-    input6 = pulseIn(CH6, HIGH) - 1500; // Channel 6
-
-    input1 = Deadband(input1, 30); // Channel 1
-    input2 = Deadband(input2, 30); // Channel 2
-    input3 = Deadband(input3, 30); // Channel 3
-    input4 = Deadband(input4, 30); // Channel 4
-    input5 = Deadband(input5, 30); // Channel 5
-    input6 = Deadband(input6, 30); // Channel 6
+//    input1 = pulseIn(CH1, HIGH) - 1500; // Channel 1
+//    input2 = pulseIn(CH2, HIGH) - 1500; // Channel 2
+//    input3 = pulseIn(CH3, HIGH) - 1500; // Channel 3
+//    input4 = pulseIn(CH4, HIGH) - 1500; // Channel 4
+//    input5 = pulseIn(CH5, HIGH) - 1500; // Channel 5
+//    input6 = pulseIn(CH6, HIGH) - 1500; // Channel 6
+//
+//    input1 = Deadband(input1, 30); // Channel 1
+//    input2 = Deadband(input2, 30); // Channel 2
+//    input3 = Deadband(input3, 30); // Channel 3
+//    input4 = Deadband(input4, 30); // Channel 4
+//    input5 = Deadband(input5, 30); // Channel 5
+//    input6 = Deadband(input6, 30); // Channel 6
 
     // Filter Signal
-    float filterInput3 = adcFilter3.filter(input3);
-    float filterInput4 = adcFilter4.filter(input4);
+//    float filterInput3 = adcFilter3.filter(input3);
+//    float filterInput4 = adcFilter4.filter(input4);
 
     // Read Motor's Current From Motor Driver
     // The resolution of Arduino analogRead is 5/1024 Volts/Unit. (10-Bit, Signal vary from 0 to 1023 units)
     // The resolution of Current Sensor from POLOLU VNH5019 is 0.14 Volt/Amp.
     // Convert analogRead signal(Volt) to Current(Amp) by multiply (5/1024)/0.14 = 0.035 Amp/Unit.
-    currentValue1 = analogRead(CS1) * 0.035; // Motor Driver 1
-    currentValue2 = analogRead(CS2) * 0.035; // Motor Driver 2
+//    currentValue1 = analogRead(CS1) * 0.035; // Motor Driver 1
+//    currentValue2 = analogRead(CS2) * 0.035; // Motor Driver 2
 
     // Check Motor Current and Assign Motor Direction
     // Motor can be operated, if motor's current is lower than 5 amp.
-    if (currentValue1 < currentLimit)
-      out1 = OutputToMotor1(input1);
-    else
-      out1 = OutputToMotor1(0);
-    if (currentValue2 < currentLimit)
-      out2 = OutputToMotor2(input2);
-    else
-      out2 = OutputToMotor2(0);
+//    if (currentValue1 < currentLimit)
+//      out1 = OutputToMotor1(input1);
+//    else
+//      out1 = OutputToMotor1(0);
+//    if (currentValue2 < currentLimit)
+//      out2 = OutputToMotor2(input2);
+//    else
+//      out2 = OutputToMotor2(0);
 
     // Drive Motor
     // Assign motor's direction by function OutputToMotor.
     // Command PWM Duty Cycle to drive motor.
-    analogWrite(PWM1, out1);
-    analogWrite(PWM2, out2);
+//     analogWrite(PWM1, out1);
+//     analogWrite(PWM2, out2);
 
     // Moving Servo
 
-    AdjustAngleRotating(myServo2, filterInput4); // rotating
-
-    if (input5 > 450)
-    {
-      filterInput5 = 100;
-    }
-    else if (input5 < -450)
-    {
-      filterInput5 = 0;
-    }
-    //myServo3.write(filterInput5); // gripping
-
-    AdjustAngleBase(myServo1, myServo4, filterInput3); // base
+//    AdjustAngleRotating(myServo2, filterInput4); // rotating
+//
+//    if (input5 > 450)
+//    {
+//      filterInput5 = 100;
+//    }
+//    else if (input5 < -450)
+//    {
+//      filterInput5 = 0;
+//    }
+//    //myServo3.write(filterInput5); // gripping
+//
+//    AdjustAngleBase(myServo1, myServo4, filterInput3); // base
 
     // Print
 //    Serial.print("M 1 = ");
@@ -214,15 +214,14 @@ void loop()
       if (!error)
       Serial.println("non Error check");
       {
-        int cmd = Serial.read();
+        int cmd = doc["command"];
 
         // bottle center size range ok
-        if (cmd == 0)
+        if (cmd == 9)
         {
-          myServo3.write(100);
+          myServo3.write(0);
           AdjustAngleBase(myServo1, myServo4, 300);
-          delay(2000);
-          Serial.println("cmd=0 done");
+          Serial.println("cmd=9 done");
         }
 
         // bottle center size range >
@@ -238,6 +237,9 @@ void loop()
           // Motor 2 clockwise direction
           digitalWrite(INA2, HIGH);
           digitalWrite(INB2, LOW);
+          delay(3000);
+          Serial.println("cmd=1 done");
+          AllMotorStop();
         }
 
         // bottle center size range <
@@ -253,6 +255,9 @@ void loop()
           // Motor 2 clockwise direction
           digitalWrite(INA2, LOW);
           digitalWrite(INB2, HIGH);
+          delay(3000);
+          Serial.println("cmd=2 done");
+          AllMotorStop();
         }
 
         // bottle too left
@@ -266,7 +271,9 @@ void loop()
           digitalWrite(INB2, HIGH);
           digitalWrite(INA1, LOW);
           digitalWrite(INB1, HIGH);
-          delay(1000);
+          delay(3000);
+          Serial.println("cmd=3 done");
+          AllMotorStop();
         }
 
         // bottle too right
@@ -280,34 +287,24 @@ void loop()
           digitalWrite(INB1, LOW);
           digitalWrite(INB2, LOW);
           digitalWrite(INA2, HIGH);
-          delay(1000);
+          delay(3000);
+          Serial.println("cmd=4 done");
+          AllMotorStop();
         }
 
-        // bottle too high
-        else if (cmd == 5)
-        {
-          AdjustAngleBase(myServo1, myServo4, -300);
-          delay(1000);
-        }
-
-        // bottle too low
-        else
-        {
-          AdjustAngleBase(myServo1, myServo4, 300);
-          delay(1000);
-        }
+        
       }
     }
     // If there is no serial sending to arduino
     else
     {
 
-      digitalWrite(INA3, HIGH);
-      digitalWrite(INB3, HIGH);
-      digitalWrite(INA4, HIGH);
-      digitalWrite(INB4, HIGH);
+      digitalWrite(INA1, HIGH);
+      digitalWrite(INB1, HIGH);
+      digitalWrite(INA2, HIGH);
+      digitalWrite(INB2, HIGH);
+      Serial.println("stop");
     }
-    delay(100);
 
   } // End if
 } // End loop
@@ -382,13 +379,14 @@ void AdjustAngleBase(Servo myServoL, Servo myServoR, int value)
 
   if (value > 200)
   {
-    degreeBaseL++;
-    degreeBaseR--;
+    degreeBaseL+=40;
+    degreeBaseR-+40;
+    Serial.println("kuay");
   }
   else if (value < -200)
   {
-    degreeBaseL--;
-    degreeBaseR++;
+    degreeBaseL-=20;
+    degreeBaseR+=20;
   }
 
   myServoL.write(degreeBaseL);
@@ -410,3 +408,13 @@ void AdjustAngleRotating(Servo myServo, int value)
   }
   myServo.write(degreeRotating);
 }
+
+void AllMotorStop(){
+  digitalWrite(INA1, HIGH);
+  digitalWrite(INB1, HIGH);
+  digitalWrite(INA2, HIGH);
+  digitalWrite(INB2, HIGH);
+  analogWrite(PWM1, 0);
+  analogWrite(PWM2, 0);
+}
+
